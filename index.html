@@ -1,0 +1,511 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liberty Foods</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #fff8ed;
+  color: #292929;
+}
+
+header {
+  background: #183d32;
+  color: white;
+  text-align: center;
+  padding: 28px 12px;
+}
+
+header h1 { margin: 0 0 8px; font-size: 34px; }
+header p { margin: 0; }
+
+nav {
+  background: #f5b942;
+  padding: 13px;
+  text-align: center;
+  font-weight: bold;
+}
+
+nav a {
+  color: #252525;
+  text-decoration: none;
+  margin: 0 12px;
+}
+
+main {
+  max-width: 1000px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+h2 { color: #183d32; }
+
+.menu {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+}
+
+.food {
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 3px 10px #00000012;
+  text-align: center;
+}
+
+.food .emoji { font-size: 45px; }
+.food h3 { margin: 10px 0; }
+.price { font-weight: bold; font-size: 19px; }
+
+button {
+  background: #183d32;
+  color: white;
+  border: 0;
+  padding: 11px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+button:hover { background: #28624e; }
+button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.panel {
+  background: white;
+  border-radius: 14px;
+  padding: 22px;
+  margin-top: 25px;
+  box-shadow: 0 3px 10px #00000012;
+}
+
+.cart-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid #eee;
+  padding: 12px 0;
+}
+
+.cart-row button { padding: 6px 10px; }
+.cart-actions { display: flex; align-items: center; gap: 7px; }
+.total-row { margin: 8px 0; }
+.grand-total { font-size: 22px; font-weight: bold; }
+
+label {
+  display: block;
+  font-weight: bold;
+  margin-top: 14px;
+}
+
+input, select, textarea {
+  display: block;
+  width: 100%;
+  padding: 11px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  border-radius: 7px;
+  font: inherit;
+}
+
+textarea { resize: vertical; }
+
+.hint { color: #666; font-size: 14px; }
+.hidden { display: none; }
+
+#message {
+  margin-top: 16px;
+  padding: 13px;
+  border-radius: 8px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.success { background: #e0f5e6; color: #14532d; }
+.error { background: #ffe5e5; color: #8b1515; }
+.info { background: #e8f0ff; color: #173c72; }
+
+footer {
+  text-align: center;
+  background: #183d32;
+  color: white;
+  padding: 22px;
+  margin-top: 35px;
+}
+
+@media (max-width: 480px) {
+  header h1 { font-size: 27px; }
+  nav a { display: inline-block; margin: 5px 8px; }
+  .cart-row { align-items: flex-start; flex-wrap: wrap; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🍔 LIBERTY FOODS 🇺🇸</h1>
+  <p>Fresh food. Big flavor.</p>
+</header>
+
+<nav>
+  <a href="#menu">Menu</a>
+  <a href="#cart">Cart</a>
+  <a href="#checkout">Checkout</a>
+</nav>
+
+<main>
+  <section id="menu">
+    <h2>🍽️ Our Menu</h2>
+    <div class="menu" id="menuItems"></div>
+  </section>
+
+  <section class="panel" id="cart">
+    <h2>🛒 Your Cart</h2>
+    <div id="cartItems">Your cart is empty.</div>
+
+    <div class="total-row">Subtotal: <strong id="subtotal">$0.00</strong></div>
+    <div class="total-row">Discount: <strong id="discount">-$0.00</strong></div>
+    <div class="total-row">Tax (6%): <strong id="tax">$0.00</strong></div>
+    <div class="total-row grand-total">Total: <span id="total">$0.00</span></div>
+
+    <label for="discountCode">Discount code</label>
+    <input id="discountCode" placeholder="Enter your code">
+    <button type="button" id="applyDiscount">Apply Code</button>
+    <p class="hint">Have a discount code? Enter it above to check for special offers.</p>
+    <p id="discountMessage" class="hint"></p>
+
+    <button type="button" id="clearCart" style="background:#a52a2a">
+      Clear Cart
+    </button>
+  </section>
+
+  <section class="panel" id="checkout">
+    <h2>📦 Checkout</h2>
+    <p class="hint">This is a demo checkout. No payment is collected.</p>
+
+    <form id="checkoutForm">
+      <label for="customerName">Your name *</label>
+      <input id="customerName" required maxlength="100" autocomplete="name">
+
+      <label for="customerEmail">Your email *</label>
+      <input id="customerEmail" type="email" required maxlength="200" autocomplete="email">
+
+      <label for="customerPhone">Phone number</label>
+      <input id="customerPhone" type="tel" maxlength="40" autocomplete="tevfol">
+
+      <label for="fulfillment">Order type *</label>
+      <select id="fulfillment" required>
+        <option value="Pickup">Pickup</option>
+        <option value="Delivery">Delivery</option>
+      </select>
+
+      <div id="addressSection" class="hidden">
+        <label for="address">Delivery address *</label>
+        <textarea id="address" rows="2" maxlength="500"
+          autocomplete="street-address"></textarea>
+      </div>
+
+      <label for="orderNotes">Order notes (optional)</label>
+      <textarea id="orderNotes" rows="3" maxlength="1000"
+        placeholder="Any special instructions?"></textarea>
+
+      <p id="checkoutTotal" class="grand-total">Total: $0.00</p>
+
+      <button type="submit" id="placeOrder" style="width:100%">
+        Place Order
+      </button>
+
+      <div id="message" class="hidden" role="status" aria-live="polite"></div>
+    </form>
+  </section>
+</main>
+
+<footer>
+  <strong>🍔 Liberty Foods</strong>
+  <p>Fresh food. Big flavor.</p>
+  <p>Demo website — no real payments are processed.</p>
+</footer>
+
+<script>
+"use strict";
+
+// EMAILJS SETTINGS
+const EMAILJS_PUBLIC_KEY = "nir4V8VFLtlofr2mS";
+const EMAILJS_SERVICE_ID = "service_p71m5z7";
+const EMAILJS_TEMPLATE_ID = "template_i9u2pow";
+
+// MENU
+const menu = [
+  { id: "burger", name: "Burger", price: 9.99, emoji: "🍔" },
+  { id: "pizza", name: "Pizza", price: 12.99, emoji: "🍕" },
+  { id: "fries", name: "Fries", price: 4.99, emoji: "🍟" },
+  { id: "hotdog", name: "Hot Dog", price: 6.99, emoji: "🌭" },
+  { id: "tenders", name: "Chicken Tenders", price: 8.99, emoji: "🍗" },
+  { id: "drink", name: "Fountain Drink", price: 2.49, emoji: "🥤" }
+];
+
+const cart = {};
+let discountApplied = false;
+let sendingOrder = false;
+
+const $ = id => document.getElementById(id);
+const money = amount => "$" + amount.toFixed(2);
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+function showMessage(text, type) {
+  const box = $("message");
+  box.textContent = text;
+  box.className = type;
+}
+
+function hideMessage() {
+  $("message").textContent = "";
+  $("message").className = "hidden";
+}
+
+function renderMenu() {
+  $("menuItems").innerHTML = menu.map(item => `
+    <article class="food">
+      <div class="emoji">${item.emoji}</div>
+      <h3>${item.name}</h3>
+      <p class="price">${money(item.price)}</p>
+      <button type="button" data-add="${item.id}">Add to Cart</button>
+    </article>
+  `).join("");
+}
+
+function getTotals() {
+  const subtotal = menu.reduce((sum, item) =>
+    sum + item.price * (cart[item.id] || 0), 0);
+
+  const discount = discountApplied ? subtotal * 0.10 : 0;
+  const taxableAmount = Math.max(0, subtotal - discount);
+  const tax = taxableAmount * 0.06;
+  const total = taxableAmount + tax;
+
+  return { subtotal, discount, tax, total };
+}
+
+function renderCart() {
+  const rows = menu.filter(item => (cart[item.id] || 0) > 0);
+
+  if (rows.length === 0) {
+    $("cartItems").textContent = "Your cart is empty. Add something delicious!";
+  } else {
+    $("cartItems").innerHTML = rows.map(item => `
+      <div class="cart-row">
+        <div>
+          <strong>${item.emoji} ${item.name}</strong><br>
+          ${money(item.price)} each
+        </div>
+        <div class="cart-actions">
+          <button type="button" data-change="${item.id}" data-amount="-1"
+            aria-label="Remove one ${item.name}">−</button>
+          <strong>${cart[item.id]}</strong>
+          <button type="button" data-change="${item.id}" data-amount="1"
+            aria-label="Add one ${item.name}">+</button>
+          <button type="button" data-remove="${item.id}"
+            style="background:#a52a2a">Remove</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  const totals = getTotals();
+  $("subtotal").textContent = money(totals.subtotal);
+  $("discount").textContent = "-" + money(totals.discount);
+  $("tax").textContent = money(totals.tax);
+  $("total").textContent = money(totals.total);
+  $("checkoutTotal").textContent = "Total: " + money(totals.total);
+
+  $("placeOrder").disabled = sendingOrder;
+}
+
+function addToCart(id) {
+  if (!menu.some(item => item.id === id)) return;
+  cart[id] = (cart[id] || 0) + 1;
+  renderCart();
+}
+
+function changeQuantity(id, amount) {
+  if (!menu.some(item => item.id === id)) return;
+  cart[id] = Math.max(0, (cart[id] || 0) + amount);
+  renderCart();
+}
+
+function clearCart() {
+  menu.forEach(item => delete cart[item.id]);
+  discountApplied = false;
+  $("discountCode").value = "";
+  $("discountMessage").textContent = "";
+  renderCart();
+}
+
+$("menuItems").addEventListener("click", event => {
+  const button = event.target.closest("[data-add]");
+  if (button) addToCart(button.dataset.add);
+});
+
+$("cartItems").addEventListener("click", event => {
+  const button = event.target.closest("button");
+  if (!button) return;
+
+  if (button.dataset.change) {
+    changeQuantity(button.dataset.change, Number(button.dataset.amount));
+  }
+
+  if (button.dataset.remove) {
+    delete cart[button.dataset.remove];
+    renderCart();
+  }
+});
+
+$("clearCart").addEventListener("click", clearCart);
+
+$("applyDiscount").addEventListener("click", () => {
+  const code = $("discountCode").value.trim();
+  discountApplied = code === "faisalrules67";
+
+  $("discountMessage").textContent = discountApplied
+    ? "Discount applied! You saved 10%."
+    : "That code isn't valid. Check it and try again.";
+
+  renderCart();
+});
+
+$("fulfillment").addEventListener("change", () => {
+  const delivery = $("fulfillment").value === "Delivery";
+  $("addressSection").classList.toggle("hidden", !delivery);
+  $("address").required = delivery;
+});
+
+function makeOrderNumber() {
+  return "LF-" + Date.now().toString().slice(-9);
+}
+
+$("checkoutForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  hideMessage();
+
+  if (sendingOrder) return;
+
+  const totals = getTotals();
+  if (totals.subtotal <= 0) {
+    showMessage("Your cart is empty! Add food before placing an order.", "error");
+    return;
+  }
+
+  if (!EMAILJS_PUBLIC_KEY || !EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID) {
+    showMessage("EmailJS settings are missing. Check the settings in the code.", "error");
+    return;
+  }
+
+  if (typeof emailjs === "undefined") {
+    showMessage(
+      "The EmailJS script did not load. Check your internet connection and reload the page.",
+      "error"
+    );
+    return;
+  }
+
+  const fulfillment = $("fulfillment").value;
+  const address = $("address").value.trim();
+
+  if (fulfillment === "Delivery" && !address) {
+    showMessage("Please enter your delivery address.", "error");
+    $("address").focus();
+    return;
+  }
+
+  const orderNumber = makeOrderNumber();
+  const orderItems = menu
+    .filter(item => (cart[item.id] || 0) > 0)
+    .map(item => `${item.name} x ${cart[item.id]} = ${money(item.price * cart[item.id])}`)
+    .join("\n");
+
+  // These names must match the variables in your EmailJS template.
+  const templateParams = {
+    order_number: orderNumber,
+    customer_name: $("customerName").value.trim(),
+    customer_email: $("customerEmail").value.trim(),
+    customer_phone: $("customerPhone").value.trim() || "Not provided",
+    fulfillment: fulfillment,
+    address: fulfillment === "Delivery" ? address : "Pickup",
+    order_items: orderItems,
+    subtotal: money(totals.subtotal),
+    discount: money(totals.discount),
+    tax: money(totals.tax),
+    total: money(totals.total),
+    order_notes: $("orderNotes").value.trim() || "None"
+  };
+
+  sendingOrder = true;
+  $("placeOrder").textContent = "Sending Order...";
+  renderCart();
+  showMessage("Sending your order email. Please wait...", "info");
+
+  try {
+    const response = await emailjs.send(
+      EMAILJS_SERVICE_ID,
+      EMAILJS_TEMPLATE_ID,
+      templateParams,
+      { publicKey: EMAILJS_PUBLIC_KEY }
+    );
+
+    console.log("EmailJS success:", response.status, response.text);
+
+    showMessage(
+      "Order " + orderNumber + " sent successfully! Check your email for the order notification.",
+      "success"
+    );
+
+    clearCart();
+    $("orderNotes").value = "";
+  } catch (error) {
+    console.error("EmailJS send failed:", error);
+
+    const details = error && error.text
+      ? error.text
+      : error && error.message
+        ? error.message
+        : String(error);
+
+    showMessage(
+      "The email could not be sent, so your cart is still saved.\n\n" +
+      "Technical error: " + details +
+      "\n\nPlease share this exact error message so we can identify the problem.",
+      "error"
+    );
+  } finally {
+    sendingOrder = false;
+    $("placeOrder").textContent = "Place Order";
+    renderCart();
+  }
+});
+
+renderMenu();
+renderCart();
+</script>
+
+</body>
+</html>
