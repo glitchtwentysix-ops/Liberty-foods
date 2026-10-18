@@ -8,6 +8,21 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#174c35">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Liberty Foods">
+
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js")
+        .catch(error => console.error("Service worker error:", error));
+    });
+  }
+</script>
+
 <style>
 * { box-sizing: border-box; }
 
