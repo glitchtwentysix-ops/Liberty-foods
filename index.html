@@ -7,7 +7,6 @@
 <title>Liberty Foods</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#174c35">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -15,12 +14,12 @@
 <meta name="apple-mobile-web-app-title" content="Liberty Foods">
 
 <script>
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js")
-        .catch(error => console.error("Service worker error:", error));
-    });
-  }
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js")
+      .catch(error => console.error("Service worker error:", error));
+  });
+}
 </script>
 
 <style>
@@ -64,6 +63,22 @@ main {
 
 h2 { color: #183d32; }
 
+.category-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 14px 0 20px;
+}
+
+.category-buttons button {
+  flex: 1 1 150px;
+}
+
+.category-buttons button.active {
+  background: #f5b942;
+  color: #252525;
+}
+
 .menu {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -80,6 +95,7 @@ h2 { color: #183d32; }
 
 .food .emoji { font-size: 45px; }
 .food h3 { margin: 10px 0; }
+.food .hint { line-height: 1.45; }
 .price { font-weight: bold; font-size: 19px; }
 
 button {
@@ -134,7 +150,6 @@ input, select, textarea {
 }
 
 textarea { resize: vertical; }
-
 .hint { color: #666; font-size: 14px; }
 .hidden { display: none; }
 
@@ -167,7 +182,6 @@ footer {
 </head>
 
 <body>
-
 <header>
   <h1>🍔 LIBERTY FOODS 🇺🇸</h1>
   <p>Fresh food. Big flavor.</p>
@@ -182,17 +196,20 @@ footer {
 <main>
   <section id="menu">
     <h2>🍽️ Our Menu</h2>
-    <div class="menu" id="menuItems"></div>
+    <div class="category-buttons" id="categoryButtons"></div>
+    <div class="menu" id="menuItems">
+      <p class="hint">Choose a category above to see what's available!</p>
+    </div>
   </section>
 
   <section class="panel" id="cart">
     <h2>🛒 Your Cart</h2>
     <div id="cartItems">Your cart is empty.</div>
 
-    <div class="total-row">Subtotal: <strong id="subtotal">$0.00</strong></div>
-    <div class="total-row">Discount: <strong id="discount">-$0.00</strong></div>
-    <div class="total-row">Tax (6%): <strong id="tax">$0.00</strong></div>
-    <div class="total-row grand-total">Total: <span id="total">$0.00</span></div>
+    <div class="total-row">Subtotal: <strong id="subtotal">BD 0.000</strong></div>
+    <div class="total-row">Discount: <strong id="discount">-BD 0.000</strong></div>
+    <div class="total-row">Tax (6%): <strong id="tax">BD 0.000</strong></div>
+    <div class="total-row grand-total">Total: <span id="total">BD 0.000</span></div>
 
     <label for="discountCode">Discount code</label>
     <input id="discountCode" placeholder="Enter your code">
@@ -235,7 +252,7 @@ footer {
       <textarea id="orderNotes" rows="3" maxlength="1000"
         placeholder="Any special instructions?"></textarea>
 
-      <p id="checkoutTotal" class="grand-total">Total: $0.00</p>
+      <p id="checkoutTotal" class="grand-total">Total: BD 0.000</p>
 
       <button type="submit" id="placeOrder" style="width:100%">
         Place Order
@@ -260,14 +277,50 @@ const EMAILJS_PUBLIC_KEY = "nir4V8VFLtlofr2mS";
 const EMAILJS_SERVICE_ID = "service_p71m5z7";
 const EMAILJS_TEMPLATE_ID = "template_i9u2pow";
 
-// MENU
+// MENU — prices in Bahraini dinars
 const menu = [
-  { id: "burger", name: "Burger", price: 9.99, emoji: "🍔" },
-  { id: "pizza", name: "Pizza", price: 12.99, emoji: "🍕" },
-  { id: "fries", name: "Fries", price: 4.99, emoji: "🍟" },
-  { id: "hotdog", name: "Hot Dog", price: 6.99, emoji: "🌭" },
-  { id: "tenders", name: "Chicken Tenders", price: 8.99, emoji: "🍗" },
-  { id: "drink", name: "Fountain Drink", price: 2.49, emoji: "🥤" }
+  { id: "burger", category: "Hot Food", name: "Burger", price: 3.770, emoji: "🍔" },
+  { id: "pizza", category: "Hot Food", name: "Pizza", price: 4.900, emoji: "🍕" },
+  { id: "fries", category: "Hot Food", name: "Fries", price: 1.885, emoji: "🍟" },
+  { id: "hotdog", category: "Hot Food", name: "Hot Dog", price: 2.640, emoji: "🌭" },
+  { id: "tenders", category: "Hot Food", name: "Chicken Tenders", price: 3.395, emoji: "🍗" },
+
+  { id: "cookies", category: "Snacks & Sweets", name: "Chocolate Chip Cookies", price: 1.320, emoji: "🍪" },
+  { id: "cakemix", category: "Snacks & Sweets", name: "Cake Mix", price: 1.500, emoji: "🧁" },
+  { id: "brownmix", category: "Snacks & Sweets", name: "Brownie Mix", price: 1.500, emoji: "🍫" },
+  { id: "gummycandy", category: "Snacks & Sweets", name: "Gummy Candy Bag", price: 0.940, emoji: "🍬" },
+  { id: "chocolate", category: "Snacks & Sweets", name: "Chocolate Bar", price: 0.750, emoji: "🍫" },
+  { id: "cereal", category: "Snacks & Sweets", name: "Cereal Box", price: 1.885, emoji: "🥣" },
+
+  {
+    id: "signaturepack",
+    category: "Drinks",
+    name: "Liberty Foods Signature Pack",
+    price: 2.000,
+    emoji: "🧃",
+    description: "All 7 juice boxes: Liberty Lemon, Freedom Fizz, Patriot Punch, Star-Spangled Strawberry, Eagle Elixir, Justice Jackfruit, and Founding Fruit. Pack only!"
+  },
+  {
+    id: "prespack",
+    category: "Drinks",
+    name: "The Pres Pack",
+    price: 2.000,
+    emoji: "🇺🇸",
+    description: "All 7 juice boxes: Blueberry Biden, Tangerine Trump, Olive Obama, George Watermelon, Lincoln Lime, Raspberry Roosevelt, and Kiwi Kennedy. Pack only!"
+  },
+
+  {
+    id: "mysterypoop",
+    category: "Toys",
+    name: "Mystery Poop Squishies",
+    price: 1.500,
+    emoji: "💩",
+    description: "10 rarities: Common, Uncommon, Rare, Epic, Legendary, Mythical, Secret, Cosmic, Unknown, and Glitch."
+  },
+
+  { id: "toothpaste", category: "Everyday Essentials", name: "Toothpaste Tube", price: 1.130, emoji: "🪥" },
+  { id: "toothbrush", category: "Everyday Essentials", name: "Toothbrush", price: 0.750, emoji: "🪥" },
+  { id: "travelset", category: "Everyday Essentials", name: "Travel Toothpaste & Brush Set", price: 1.885, emoji: "🧳" }
 ];
 
 const cart = {};
@@ -275,17 +328,7 @@ let discountApplied = false;
 let sendingOrder = false;
 
 const $ = id => document.getElementById(id);
-const money = amount => "$" + amount.toFixed(2);
-
-function escapeHTML(value) {
-  return String(value).replace(/[&<>"']/g, char => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[char]);
-}
+const money = amount => "BD " + amount.toFixed(3);
 
 function showMessage(text, type) {
   const box = $("message");
@@ -298,11 +341,41 @@ function hideMessage() {
   $("message").className = "hidden";
 }
 
+// FIVE CATEGORY BUTTONS
+const categories = [
+  "Hot Food",
+  "Snacks & Sweets",
+  "Drinks",
+  "Toys",
+  "Everyday Essentials"
+];
+
+let selectedCategory = "";
+
 function renderMenu() {
-  $("menuItems").innerHTML = menu.map(item => `
+  $("categoryButtons").innerHTML = categories.map(category => `
+    <button
+      type="button"
+      class="${selectedCategory === category ? "active" : ""}"
+      data-category="${category}"
+      aria-pressed="${selectedCategory === category}">
+      ${category}
+    </button>
+  `).join("");
+
+  if (!selectedCategory) {
+    $("menuItems").innerHTML =
+      '<p class="hint">Choose a category above to see what’s available!</p>';
+    return;
+  }
+
+  const items = menu.filter(item => item.category === selectedCategory);
+
+  $("menuItems").innerHTML = items.map(item => `
     <article class="food">
       <div class="emoji">${item.emoji}</div>
       <h3>${item.name}</h3>
+      ${item.description ? `<p class="hint">${item.description}</p>` : ""}
       <p class="price">${money(item.price)}</p>
       <button type="button" data-add="${item.id}">Add to Cart</button>
     </article>
@@ -325,7 +398,8 @@ function renderCart() {
   const rows = menu.filter(item => (cart[item.id] || 0) > 0);
 
   if (rows.length === 0) {
-    $("cartItems").textContent = "Your cart is empty. Add something delicious!";
+    $("cartItems").textContent =
+      "Your cart is empty. Add something delicious!";
   } else {
     $("cartItems").innerHTML = rows.map(item => `
       <div class="cart-row">
@@ -352,7 +426,6 @@ function renderCart() {
   $("tax").textContent = money(totals.tax);
   $("total").textContent = money(totals.total);
   $("checkoutTotal").textContent = "Total: " + money(totals.total);
-
   $("placeOrder").disabled = sendingOrder;
 }
 
@@ -376,6 +449,15 @@ function clearCart() {
   renderCart();
 }
 
+// Clicking a category shows only that category's products
+$("categoryButtons").addEventListener("click", event => {
+  const button = event.target.closest("[data-category]");
+  if (!button) return;
+
+  selectedCategory = button.dataset.category;
+  renderMenu();
+});
+
 $("menuItems").addEventListener("click", event => {
   const button = event.target.closest("[data-add]");
   if (button) addToCart(button.dataset.add);
@@ -386,7 +468,10 @@ $("cartItems").addEventListener("click", event => {
   if (!button) return;
 
   if (button.dataset.change) {
-    changeQuantity(button.dataset.change, Number(button.dataset.amount));
+    changeQuantity(
+      button.dataset.change,
+      Number(button.dataset.amount)
+    );
   }
 
   if (button.dataset.remove) {
@@ -425,13 +510,20 @@ $("checkoutForm").addEventListener("submit", async event => {
   if (sendingOrder) return;
 
   const totals = getTotals();
+
   if (totals.subtotal <= 0) {
-    showMessage("Your cart is empty! Add food before placing an order.", "error");
+    showMessage(
+      "Your cart is empty! Add food before placing an order.",
+      "error"
+    );
     return;
   }
 
   if (!EMAILJS_PUBLIC_KEY || !EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID) {
-    showMessage("EmailJS settings are missing. Check the settings in the code.", "error");
+    showMessage(
+      "EmailJS settings are missing. Check the settings in the code.",
+      "error"
+    );
     return;
   }
 
@@ -453,12 +545,14 @@ $("checkoutForm").addEventListener("submit", async event => {
   }
 
   const orderNumber = makeOrderNumber();
+
   const orderItems = menu
     .filter(item => (cart[item.id] || 0) > 0)
-    .map(item => `${item.name} x ${cart[item.id]} = ${money(item.price * cart[item.id])}`)
+    .map(item =>
+      `${item.name} x ${cart[item.id]} = ${money(item.price * cart[item.id])}`
+    )
     .join("\n");
 
-  // These names must match the variables in your EmailJS template.
   const templateParams = {
     order_number: orderNumber,
     customer_name: $("customerName").value.trim(),
@@ -490,7 +584,8 @@ $("checkoutForm").addEventListener("submit", async event => {
     console.log("EmailJS success:", response.status, response.text);
 
     showMessage(
-      "Order " + orderNumber + " sent successfully! Check your email for the order notification.",
+      "Order " + orderNumber +
+      " sent successfully! Check your email for the order notification.",
       "success"
     );
 
@@ -521,6 +616,5 @@ $("checkoutForm").addEventListener("submit", async event => {
 renderMenu();
 renderCart();
 </script>
-
 </body>
 </html>
