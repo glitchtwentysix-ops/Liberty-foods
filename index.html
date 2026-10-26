@@ -744,7 +744,7 @@ $("checkoutForm").addEventListener("submit", async event => {
   const orderItems = menu
     .filter(item => (cart[item.id] || 0) > 0)
     .map(item =>
-      `${displayName(item)} x ${cart[item.id]} = ${money(item.price * cart[item.id]}`
+      `${displayName(item)} x ${cart[item.id]} = ${money(item.price * cart[item.id])}`
     )
     .join("\n");
 
