@@ -30,6 +30,7 @@ body {
   font-family: Arial, sans-serif;
   background: #fff8ed;
   color: #292929;
+  transition: background .35s, color .35s;
 }
 
 header {
@@ -37,6 +38,7 @@ header {
   color: white;
   text-align: center;
   padding: 28px 12px;
+  transition: background .35s;
 }
 
 header h1 { margin: 0 0 8px; font-size: 34px; }
@@ -70,9 +72,7 @@ h2 { color: #183d32; }
   margin: 14px 0 20px;
 }
 
-.category-buttons button {
-  flex: 1 1 150px;
-}
+.category-buttons button { flex: 1 1 150px; }
 
 .category-buttons button.active {
   background: #f5b942;
@@ -91,6 +91,7 @@ h2 { color: #183d32; }
   border-radius: 14px;
   box-shadow: 0 3px 10px #00000012;
   text-align: center;
+  transition: background .35s, transform .2s;
 }
 
 .food .emoji { font-size: 45px; }
@@ -109,7 +110,7 @@ button {
 }
 
 button:hover { background: #28624e; }
-button:disabled { opacity: 0.55; cursor: not-allowed; }
+button:disabled { opacity: .55; cursor: not-allowed; }
 
 .panel {
   background: white;
@@ -173,6 +174,85 @@ footer {
   margin-top: 35px;
 }
 
+/* PHANTOM FOODS: cursed October theme */
+body.phantom {
+  background: #100b18;
+  color: #f3eaff;
+}
+
+body.phantom header {
+  background: linear-gradient(135deg, #09060e, #351044, #160b24);
+  border-bottom: 3px solid #a43bff;
+}
+
+body.phantom nav {
+  background: #250c35;
+  border-bottom: 1px solid #8b26c4;
+}
+
+body.phantom nav a { color: #f1d8ff; }
+
+body.phantom h2 { color: #d78cff; }
+
+body.phantom .food,
+body.phantom .panel {
+  background: #20152b;
+  color: #f3eaff;
+  border: 1px solid #66358a;
+  box-shadow: 0 0 14px #8d28b533;
+}
+
+body.phantom .food:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 20px #a43bff66;
+}
+
+body.phantom .food .hint,
+body.phantom .hint { color: #c5b0d5; }
+
+body.phantom button {
+  background: #7022a0;
+  color: white;
+}
+
+body.phantom button:hover { background: #963bd0; }
+
+body.phantom .category-buttons button.active {
+  background: #b6ff42;
+  color: #170b20;
+}
+
+body.phantom input,
+body.phantom select,
+body.phantom textarea {
+  background: #130c1c;
+  color: white;
+  border-color: #75419a;
+}
+
+body.phantom footer {
+  background: #09060e;
+  border-top: 2px solid #a43bff;
+}
+
+body.phantom .cart-row { border-color: #543466; }
+
+body.phantom .success { background: #163b26; color: #a6ffbd; }
+body.phantom .error { background: #471b29; color: #ffc2d0; }
+body.phantom .info { background: #25143c; color: #e4c6ff; }
+
+.phantom-banner {
+  display: none;
+  padding: 14px;
+  text-align: center;
+  background: #b6ff42;
+  color: #180b20;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+body.phantom .phantom-banner { display: block; }
+
 @media (max-width: 480px) {
   header h1 { font-size: 27px; }
   nav a { display: inline-block; margin: 5px 8px; }
@@ -183,9 +263,13 @@ footer {
 
 <body>
 <header>
-  <h1>🍔 LIBERTY FOODS 🇺🇸</h1>
-  <p>Fresh food. Big flavor.</p>
+  <h1 id="brandTitle">🍔 LIBERTY FOODS 🇺🇸</h1>
+  <p id="brandSubtitle">Fresh food. Big flavor.</p>
 </header>
+
+<div class="phantom-banner">
+  ☠ THE CURSE IS ACTIVE ☠ PHANTOM FOODS ☠
+</div>
 
 <nav>
   <a href="#menu">Menu</a>
@@ -195,7 +279,7 @@ footer {
 
 <main>
   <section id="menu">
-    <h2>🍽️ Our Menu</h2>
+    <h2 id="menuHeading">🍽️ Our Menu</h2>
     <div class="category-buttons" id="categoryButtons"></div>
     <div class="menu" id="menuItems">
       <p class="hint">Choose a category above to see what's available!</p>
@@ -203,7 +287,7 @@ footer {
   </section>
 
   <section class="panel" id="cart">
-    <h2>🛒 Your Cart</h2>
+    <h2 id="cartHeading">🛒 Your Cart</h2>
     <div id="cartItems">Your cart is empty.</div>
 
     <div class="total-row">Subtotal: <strong id="subtotal">BD 0.000</strong></div>
@@ -211,10 +295,10 @@ footer {
     <div class="total-row">Tax (6%): <strong id="tax">BD 0.000</strong></div>
     <div class="total-row grand-total">Total: <span id="total">BD 0.000</span></div>
 
-    <label for="discountCode">Discount code</label>
+    <label for="discountCode">Discount code / secret code</label>
     <input id="discountCode" placeholder="Enter your code">
     <button type="button" id="applyDiscount">Apply Code</button>
-    <p class="hint">Have a discount code? Enter it above to check for special offers.</p>
+    <p class="hint">Enter a discount code or discover the October curse...</p>
     <p id="discountMessage" class="hint"></p>
 
     <button type="button" id="clearCart" style="background:#a52a2a">
@@ -244,8 +328,7 @@ footer {
 
       <div id="addressSection" class="hidden">
         <label for="address">Delivery address *</label>
-        <textarea id="address" rows="2" maxlength="500"
-          autocomplete="street-address"></textarea>
+        <textarea id="address" rows="2" maxlength="500" autocomplete="street-address"></textarea>
       </div>
 
       <label for="orderNotes">Order notes (optional)</label>
@@ -264,71 +347,99 @@ footer {
 </main>
 
 <footer>
-  <strong>🍔 Liberty Foods</strong>
-  <p>Fresh food. Big flavor.</p>
+  <strong id="footerBrand">🍔 Liberty Foods</strong>
+  <p id="footerSubtitle">Fresh food. Big flavor.</p>
   <p>Demo website — no real payments are processed.</p>
 </footer>
 
 <script>
 "use strict";
 
-// EMAILJS SETTINGS
+// EMAILJS SETTINGS — your existing settings are preserved
 const EMAILJS_PUBLIC_KEY = "nir4V8VFLtlofr2mS";
 const EMAILJS_SERVICE_ID = "service_p71m5z7";
 const EMAILJS_TEMPLATE_ID = "template_i9u2pow";
 
-// MENU — prices in Bahraini dinars
-const menu = [
-  { id: "burger", category: "Hot Food", name: "Burger", price: 3.770, emoji: "🍔" },
-  { id: "pizza", category: "Hot Food", name: "Pizza", price: 4.900, emoji: "🍕" },
-  { id: "fries", category: "Hot Food", name: "Fries", price: 1.885, emoji: "🍟" },
-  { id: "hotdog", category: "Hot Food", name: "Hot Dog", price: 2.640, emoji: "🌭" },
-  { id: "tenders", category: "Hot Food", name: "Chicken Tenders", price: 3.395, emoji: "🍗" },
+const SECRET_CODE = "NEVERTYPETHISCODEV666";
+const DISCOUNT_CODE = "faisalrules67";
+const PHANTOM_STORAGE_KEY = "libertyFoodsPhantomMode";
 
-  { id: "cookies", category: "Snacks & Sweets", name: "Chocolate Chip Cookies", price: 1.320, emoji: "🍪" },
-  { id: "cakemix", category: "Snacks & Sweets", name: "Cake Mix", price: 1.500, emoji: "🧁" },
-  { id: "brownmix", category: "Snacks & Sweets", name: "Brownie Mix", price: 1.500, emoji: "🍫" },
-  { id: "gummycandy", category: "Snacks & Sweets", name: "Gummy Candy Bag", price: 0.940, emoji: "🍬" },
-  { id: "chocolate", category: "Snacks & Sweets", name: "Chocolate Bar", price: 0.750, emoji: "🍫" },
-  { id: "cereal", category: "Snacks & Sweets", name: "Cereal Box", price: 1.885, emoji: "🥣" },
+const menu = [
+  { id: "burger", category: "Hot Food", name: "Burger", phantomName: "Blood Burger", price: 3.770, emoji: "🍔", phantomEmoji: "🩸🍔" },
+  { id: "pizza", category: "Hot Food", name: "Pizza", phantomName: "Tombstone Pizza", price: 4.900, emoji: "🍕", phantomEmoji: "⚰️🍕" },
+  { id: "fries", category: "Hot Food", name: "Fries", phantomName: "Graveyard Fries", price: 1.885, emoji: "🍟", phantomEmoji: "💀🍟" },
+  { id: "hotdog", category: "Hot Food", name: "Hot Dog", phantomName: "Hellhound Hot Dog", price: 2.640, emoji: "🌭", phantomEmoji: "🐺🌭" },
+  { id: "tenders", category: "Hot Food", name: "Chicken Tenders", phantomName: "Crypt Keeper Tenders", price: 3.395, emoji: "🍗", phantomEmoji: "🦴🍗" },
+
+  { id: "cookies", category: "Snacks & Sweets", name: "Chocolate Chip Cookies", phantomName: "Witch's Cookies", price: 1.320, emoji: "🍪", phantomEmoji: "🧙🍪" },
+  { id: "cakemix", category: "Snacks & Sweets", name: "Cake Mix", phantomName: "Cursed Cake Mix", price: 1.500, emoji: "🧁", phantomEmoji: "🕯️🧁" },
+  { id: "brownmix", category: "Snacks & Sweets", name: "Brownie Mix", phantomName: "Midnight Brownie Mix", price: 1.500, emoji: "🍫", phantomEmoji: "🌑🍫" },
+  { id: "gummycandy", category: "Snacks & Sweets", name: "Gummy Candy Bag", phantomName: "Monster Gummy Bag", price: 0.940, emoji: "🍬", phantomEmoji: "👹🍬" },
+  { id: "chocolate", category: "Snacks & Sweets", name: "Chocolate Bar", phantomName: "Dark Ritual Chocolate", price: 0.750, emoji: "🍫", phantomEmoji: "🔮🍫" },
+  { id: "cereal", category: "Snacks & Sweets", name: "Cereal Box", phantomName: "Midnight Monster Cereal", price: 1.885, emoji: "🥣", phantomEmoji: "👻🥣" },
 
   {
     id: "signaturepack",
     category: "Drinks",
     name: "Liberty Foods Signature Pack",
+    phantomName: "Phantom Signature Pack",
     price: 2.000,
     emoji: "🧃",
-    description: "All 7 juice boxes: Liberty Lemon, Freedom Fizz, Patriot Punch, Star-Spangled Strawberry, Eagle Elixir, Justice Jackfruit, and Founding Fruit. Pack only!"
+    phantomEmoji: "🧪",
+    description: "All 7 juice boxes: Liberty Lemon, Freedom Fizz, Patriot Punch, Star-Spangled Strawberry, Eagle Elixir, Justice Jackfruit, and Founding Fruit. Pack only!",
+    phantomDescription: "The seven original flavours return from the shadows. Full pack only — no individual drinks."
   },
   {
     id: "prespack",
     category: "Drinks",
     name: "The Pres Pack",
+    phantomName: "The Cursed Pres Pack",
     price: 2.000,
     emoji: "🇺🇸",
-    description: "All 7 juice boxes: Blueberry Biden, Tangerine Trump, Olive Obama, George Watermelon, Lincoln Lime, Raspberry Roosevelt, and Kiwi Kennedy. Pack only!"
+    phantomEmoji: "☠️",
+    description: "All 7 juice boxes: Blueberry Biden, Tangerine Trump, Olive Obama, George Watermelon, Lincoln Lime, Raspberry Roosevelt, and Kiwi Kennedy. Pack only!",
+    phantomDescription: "Seven mysterious juice boxes from the haunted archives. Full pack only — no individual drinks."
   },
 
   {
     id: "mysterypoop",
     category: "Toys",
     name: "Mystery Poop Squishies",
+    phantomName: "Phantom Poop Squishies",
     price: 1.500,
     emoji: "💩",
-    description: "10 rarities: Common, Uncommon, Rare, Epic, Legendary, Mythical, Secret, Cosmic, Unknown, and Glitch."
+    phantomEmoji: "👻",
+    description: "10 rarities: Common, Uncommon, Rare, Epic, Legendary, Mythical, Secret, Cosmic, Unknown, and Glitch.",
+    phantomDescription: "Ten cursed rarities: Haunted, Spooky, Cursed, Phantom, Demonic, Bloodmoon, Unknown, Void, Forbidden, and 666 Glitch."
   },
 
-  { id: "toothpaste", category: "Everyday Essentials", name: "Toothpaste Tube", price: 1.130, emoji: "🪥" },
-  { id: "toothbrush", category: "Everyday Essentials", name: "Toothbrush", price: 0.750, emoji: "🪥" },
-  { id: "travelset", category: "Everyday Essentials", name: "Travel Toothpaste & Brush Set", price: 1.885, emoji: "🧳" }
+  { id: "toothpaste", category: "Everyday Essentials", name: "Toothpaste Tube", phantomName: "Monster Breath Toothpaste", price: 1.130, emoji: "🪥", phantomEmoji: "🧟" },
+  { id: "toothbrush", category: "Everyday Essentials", name: "Toothbrush", phantomName: "Crypt Cleaner Toothbrush", price: 0.750, emoji: "🪥", phantomEmoji: "🦷" },
+  { id: "travelset", category: "Everyday Essentials", name: "Travel Toothpaste & Brush Set", phantomName: "Haunted Travel Hygiene Set", price: 1.885, emoji: "🧳", phantomEmoji: "🕸️" }
 ];
 
 const cart = {};
 let discountApplied = false;
 let sendingOrder = false;
+let phantomMode = false;
 
 const $ = id => document.getElementById(id);
 const money = amount => "BD " + amount.toFixed(3);
+const isOctober = () => new Date().getMonth() === 9;
+
+function displayName(item) {
+  return phantomMode ? (item.phantomName || item.name) : item.name;
+}
+
+function displayEmoji(item) {
+  return phantomMode ? (item.phantomEmoji || item.emoji) : item.emoji;
+}
+
+function displayDescription(item) {
+  return phantomMode
+    ? (item.phantomDescription || item.description || "")
+    : (item.description || "");
+}
 
 function showMessage(text, type) {
   const box = $("message");
@@ -339,6 +450,69 @@ function showMessage(text, type) {
 function hideMessage() {
   $("message").textContent = "";
   $("message").className = "hidden";
+}
+
+function applyTheme() {
+  document.body.classList.toggle("phantom", phantomMode);
+  document.title = phantomMode ? "👻 Phantom Foods" : "Liberty Foods";
+
+  $("brandTitle").textContent = phantomMode
+    ? "👻 PHANTOM FOODS ☠️"
+    : "🍔 LIBERTY FOODS 🇺🇸";
+
+  $("brandSubtitle").textContent = phantomMode
+    ? "Cursed food. Unholy flavor."
+    : "Fresh food. Big flavor.";
+
+  $("menuHeading").textContent = phantomMode
+    ? "💀 The Cursed Menu"
+    : "🍽️ Our Menu";
+
+  $("cartHeading").textContent = phantomMode
+    ? "👻 Your Haunted Cart"
+    : "🛒 Your Cart";
+
+  $("footerBrand").textContent = phantomMode
+    ? "👻 Phantom Foods"
+    : "🍔 Liberty Foods";
+
+  $("footerSubtitle").textContent = phantomMode
+    ? "Enter if you dare..."
+    : "Fresh food. Big flavor.";
+
+  document.querySelector('meta[name="theme-color"]')
+    .setAttribute("content", phantomMode ? "#160b24" : "#174c35");
+
+  renderMenu();
+  renderCart();
+}
+
+function activatePhantom() {
+  phantomMode = true;
+  try {
+    localStorage.setItem(PHANTOM_STORAGE_KEY, "true");
+  } catch (error) {
+    console.warn("Could not save Phantom mode preference.", error);
+  }
+  applyTheme();
+}
+
+function deactivatePhantom() {
+  phantomMode = false;
+  try {
+    localStorage.removeItem(PHANTOM_STORAGE_KEY);
+  } catch (error) {
+    console.warn("Could not clear Phantom mode preference.", error);
+  }
+  applyTheme();
+}
+
+// Keep Phantom mode active across refreshes in October only.
+try {
+  phantomMode = isOctober() &&
+    localStorage.getItem(PHANTOM_STORAGE_KEY) === "true";
+} catch (error) {
+  phantomMode = false;
 }
 
 // FIVE CATEGORY BUTTONS
@@ -364,8 +538,9 @@ function renderMenu() {
   `).join("");
 
   if (!selectedCategory) {
-    $("menuItems").innerHTML =
-      '<p class="hint">Choose a category above to see what’s available!</p>';
+    $("menuItems").innerHTML = phantomMode
+      ? '<p class="hint">Choose a cursed category... if you dare.</p>'
+      : '<p class="hint">Choose a category above to see what’s available!</p>';
     return;
   }
 
@@ -373,9 +548,10 @@ function renderMenu() {
 
   $("menuItems").innerHTML = items.map(item => `
     <article class="food">
-      <div class="emoji">${item.emoji}</div>
-      <h3>${item.name}</h3>
-      ${item.description ? `<p class="hint">${item.description}</p>` : ""}
+      <div class="emoji">${displayEmoji(item)}</div>
+      <h3>${displayName(item)}</h3>
+      ${displayDescription(item)
+        ? `<p class="hint">${displayDescription(item)}</p>` : ""}
       <p class="price">${money(item.price)}</p>
       <button type="button" data-add="${item.id}">Add to Cart</button>
     </article>
@@ -398,21 +574,22 @@ function renderCart() {
   const rows = menu.filter(item => (cart[item.id] || 0) > 0);
 
   if (rows.length === 0) {
-    $("cartItems").textContent =
-      "Your cart is empty. Add something delicious!";
+    $("cartItems").textContent = phantomMode
+      ? "Your haunted cart is empty... for now."
+      : "Your cart is empty. Add something delicious!";
   } else {
     $("cartItems").innerHTML = rows.map(item => `
       <div class="cart-row">
         <div>
-          <strong>${item.emoji} ${item.name}</strong><br>
+          <strong>${displayEmoji(item)} ${displayName(item)}</strong><br>
           ${money(item.price)} each
         </div>
         <div class="cart-actions">
           <button type="button" data-change="${item.id}" data-amount="-1"
-            aria-label="Remove one ${item.name}">−</button>
+            aria-label="Remove one ${displayName(item)}">−</button>
           <strong>${cart[item.id]}</strong>
           <button type="button" data-change="${item.id}" data-amount="1"
-            aria-label="Add one ${item.name}">+</button>
+            aria-label="Add one ${displayName(item)}">+</button>
           <button type="button" data-remove="${item.id}"
             style="background:#a52a2a">Remove</button>
         </div>
@@ -449,7 +626,6 @@ function clearCart() {
   renderCart();
 }
 
-// Clicking a category shows only that category's products
 $("categoryButtons").addEventListener("click", event => {
   const button = event.target.closest("[data-category]");
   if (!button) return;
@@ -484,8 +660,29 @@ $("clearCart").addEventListener("click", clearCart);
 
 $("applyDiscount").addEventListener("click", () => {
   const code = $("discountCode").value.trim();
-  discountApplied = code === "faisalrules67";
 
+  // The secret code is a theme code, not a discount.
+  if (code === SECRET_CODE) {
+    if (!isOctober()) {
+      $("discountMessage").textContent =
+        "The curse sleeps. Phantom Foods can only awaken in October. 🎃";
+      return;
+    }
+
+    if (phantomMode) {
+      deactivatePhantom();
+      $("discountMessage").textContent =
+        "The curse has been lifted. Welcome back to Liberty Foods!";
+    } else {
+      activatePhantom();
+      $("discountMessage").textContent =
+        "☠ THE CURSE HAS AWAKENED! Welcome to Phantom Foods! 👻";
+    }
+    return;
+  }
+
+  // Normal discount code keeps working in both themes.
+  discountApplied = code.toLowerCase() === DISCOUNT_CODE;
   $("discountMessage").textContent = discountApplied
     ? "Discount applied! You saved 10%."
     : "That code isn't valid. Check it and try again.";
@@ -500,7 +697,8 @@ $("fulfillment").addEventListener("change", () => {
 });
 
 function makeOrderNumber() {
-  return "LF-" + Date.now().toString().slice(-9);
+  return (phantomMode ? "PF-" : "LF-") +
+    Date.now().toString().slice(-9);
 }
 
 $("checkoutForm").addEventListener("submit", async event => {
@@ -520,16 +718,13 @@ $("checkoutForm").addEventListener("submit", async event => {
   }
 
   if (!EMAILJS_PUBLIC_KEY || !EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID) {
-    showMessage(
-      "EmailJS settings are missing. Check the settings in the code.",
-      "error"
-    );
+    showMessage("EmailJS settings are missing. Check the code.", "error");
     return;
   }
 
   if (typeof emailjs === "undefined") {
     showMessage(
-      "The EmailJS script did not load. Check your internet connection and reload the page.",
+      "The EmailJS script did not load. Check your connection and reload.",
       "error"
     );
     return;
@@ -549,7 +744,7 @@ $("checkoutForm").addEventListener("submit", async event => {
   const orderItems = menu
     .filter(item => (cart[item.id] || 0) > 0)
     .map(item =>
-      `${item.name} x ${cart[item.id]} = ${money(item.price * cart[item.id])}`
+      `${displayName(item)} x ${cart[item.id]} = ${money(item.price * cart[item.id]}`
     )
     .join("\n");
 
@@ -560,7 +755,7 @@ $("checkoutForm").addEventListener("submit", async event => {
     customer_phone: $("customerPhone").value.trim() || "Not provided",
     fulfillment: fulfillment,
     address: fulfillment === "Delivery" ? address : "Pickup",
-    order_items: orderItems,
+    order_items: (phantomMode ? "PHANTOM FOODS ORDER\n" : "LIBERTY FOODS ORDER\n") + orderItems,
     subtotal: money(totals.subtotal),
     discount: money(totals.discount),
     tax: money(totals.tax),
@@ -585,7 +780,7 @@ $("checkoutForm").addEventListener("submit", async event => {
 
     showMessage(
       "Order " + orderNumber +
-      " sent successfully! Check your email for the order notification.",
+      " sent successfully! Your order notification has been sent.",
       "success"
     );
 
@@ -602,8 +797,7 @@ $("checkoutForm").addEventListener("submit", async event => {
 
     showMessage(
       "The email could not be sent, so your cart is still saved.\n\n" +
-      "Technical error: " + details +
-      "\n\nPlease share this exact error message so we can identify the problem.",
+      "Technical error: " + details,
       "error"
     );
   } finally {
@@ -613,8 +807,7 @@ $("checkoutForm").addEventListener("submit", async event => {
   }
 });
 
-renderMenu();
-renderCart();
+applyTheme();
 </script>
 </body>
 </html>
