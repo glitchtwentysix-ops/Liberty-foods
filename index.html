@@ -6,7 +6,6 @@
 <title>Liberty Foods</title>
 <link rel="icon" type="image/png" href="./icons/icon-192.png">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#174c35">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -38,6 +37,7 @@ header {
   color: white;
   text-align: center;
   padding: 28px 12px;
+  transition: background .35s;
 }
 
 header h1 { margin: 0 0 8px; font-size: 34px; }
@@ -153,7 +153,7 @@ textarea { resize: vertical; }
 .hint { color: #666; font-size: 14px; }
 .hidden { display: none; }
 
-#message, #sellMessage {
+#message {
   margin-top: 16px;
   padding: 13px;
   border-radius: 8px;
@@ -190,6 +190,7 @@ body.phantom nav {
 }
 
 body.phantom nav a { color: #f1d8ff; }
+
 body.phantom h2 { color: #d78cff; }
 
 body.phantom .food,
@@ -234,6 +235,7 @@ body.phantom footer {
 }
 
 body.phantom .cart-row { border-color: #543466; }
+
 body.phantom .success { background: #163b26; color: #a6ffbd; }
 body.phantom .error { background: #471b29; color: #ffc2d0; }
 body.phantom .info { background: #25143c; color: #e4c6ff; }
@@ -255,48 +257,6 @@ body.phantom .phantom-banner { display: block; }
   nav a { display: inline-block; margin: 5px 8px; }
   .cart-row { align-items: flex-start; flex-wrap: wrap; }
 }
-
-/* LIBERTY FOODS MARKETPLACE */
-.sell-nav {
-  display: inline-block;
-  background: #183d32;
-  color: white !important;
-  padding: 8px 13px;
-  border-radius: 8px;
-}
-
-.marketplace-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 16px;
-}
-
-.listing-card {
-  background: white;
-  border-radius: 14px;
-  padding: 16px;
-  box-shadow: 0 3px 10px #00000012;
-  overflow-wrap: anywhere;
-}
-
-.listing-card img {
-  width: 100%;
-  height: 170px;
-  object-fit: cover;
-  border-radius: 10px;
-  background: #fff8ed;
-}
-
-.listing-card h3 { margin-bottom: 8px; }
-.listing-price { font-weight: bold; font-size: 20px; color: #183d32; }
-
-body.phantom .listing-card {
-  background: #20152b;
-  color: #f3eaff;
-  border: 1px solid #66358a;
-}
-
-body.phantom .listing-price { color: #d78cff; }
 </style>
 </head>
 
@@ -311,12 +271,10 @@ body.phantom .listing-price { color: #d78cff; }
 </div>
 
 <nav>
-  <a href="#menu">Set Menu</a>
-  <a href="#marketplace">Marketplace</a>
+  <a href="#menu">Menu</a>
   <a href="#cart">Cart</a>
   <a href="#checkout">Checkout</a>
   <a href="#about-us">About Us</a>
-  <a href="#sell" class="sell-nav">＋ Sell</a>
 </nav>
 
 <main>
@@ -386,556 +344,568 @@ body.phantom .listing-price { color: #d78cff; }
       <div id="message" class="hidden" role="status" aria-live="polite"></div>
     </form>
   </section>
-
-  <section class="panel" id="marketplace">
-    <h2>🛍️ Liberty Foods Marketplace</h2>
-    <p class="hint">Discover items listed by the community.</p>
-    <div id="marketplaceStatus" class="hint">Marketplace listings will appear here once the shared database is connected.</div>
-    <div id="marketplaceListings" class="marketplace-grid"></div>
-  </section>
-
-  <section class="panel" id="sell">
-    <h2>＋ Sell on Liberty Foods</h2>
-    <p>List an item for other people to discover.</p>
-
-    <form id="sellForm">
-      <label for="listingImage">Item photo *</label>
-      <input id="listingImage" type="file" accept="image/png,image/jpeg,image/webp" required>
-      <p class="hint">Use a clear photo you have permission to share. Maximum 5 MB.</p>
-
-      <label for="listingName">Item name *</label>
-      <input id="listingName" required maxlength="100" placeholder="What are you selling?">
-
-      <label for="listingPrice">Price in BHD *</label>
-      <input id="listingPrice" type="number" required min="0.001" max="100000" step="0.001" placeholder="e.g. 2.500">
-
-      <label for="listingDescription">Description *</label>
-      <textarea id="listingDescription" required maxlength="1000" rows="4" placeholder="Describe the item honestly..."></textarea>
-
-      <button type="submit" id="publishListing" style="width:100%;margin-top:18px">
-        Publish on Liberty Foods
-      </button>
-
-      <div id="sellMessage" class="hidden" role="status" aria-live="polite"></div>
-    </form>
-  </section>
-    <section class="panel" id="about-us">
-    <h2>🇺🇸 About Liberty Foods</h2>
-    <p>
-      Welcome to Liberty Foods! We believe in fresh food, big flavor,
-      and discovering exciting things. Explore our set menu or browse
-      items listed on our marketplace.
-    </p>
-    <p class="hint">
-      This is a demo website. Orders and listings are not verified,
-      and no real payments are processed.
-    </p>
-  </section>
 </main>
 
 <footer>
-  <p>🍔 LIBERTY FOODS 🇺🇸</p>
-  <p>Fresh food. Big flavor.</p>
-  <p>Demo website — no real payments processed.</p>
+  <strong id="footerBrand">🍔 Liberty Foods</strong>
+  <p id="footerSubtitle">Fresh food. Big flavor.</p>
+  <p>Demo website — no real payments are processed.</p>
 </footer>
 
 <script>
-/* EMAILJS SETTINGS */
+"use strict";
+
+// EMAILJS SETTINGS — your existing settings are preserved
 const EMAILJS_PUBLIC_KEY = "nir4V8VFLtlofr2mS";
 const EMAILJS_SERVICE_ID = "service_p71m5z7";
 const EMAILJS_TEMPLATE_ID = "template_i9u2pow";
 
-if (window.emailjs) {
-  emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-}
+const SECRET_CODE = "NEVERTYPETHISCODEV666";
+const DISCOUNT_CODE = "faisalrules67";
+const PHANTOM_STORAGE_KEY = "libertyFoodsPhantomMode";
 
-/*
-  SUPABASE SETTINGS
+const menu = [
+  { id: "burger", category: "Hot Food", name: "Burger", phantomName: "Blood Burger", price: 3.770, emoji: "🍔", phantomEmoji: "🩸🍔" },
+  { id: "pizza", category: "Hot Food", name: "Pizza", phantomName: "Tombstone Pizza", price: 4.900, emoji: "🍕", phantomEmoji: "⚰️🍕" },
+  { id: "fries", category: "Hot Food", name: "Fries", phantomName: "Graveyard Fries", price: 1.885, emoji: "🍟", phantomEmoji: "💀🍟" },
+  { id: "hotdog", category: "Hot Food", name: "Hot Dog", phantomName: "Hellhound Hot Dog", price: 2.640, emoji: "🌭", phantomEmoji: "🐺🌭" },
+  { id: "tenders", category: "Hot Food", name: "Chicken Tenders", phantomName: "Crypt Keeper Tenders", price: 3.395, emoji: "🍗", phantomEmoji: "🦴🍗" },
 
-  These are placeholders. Shared marketplace listings will not work
-  until you create a Supabase project and configure its database.
-  Use only your project's public anon/publishable key here.
-  NEVER put a service_role or secret key in website code.
-*/
-const SUPABASE_URL = "PASTE_YOUR_SUPABASE_PROJECT_URL_HERE";
-const SUPABASE_ANON_KEY = "PASTE_YOUR_SUPABASE_ANON_PUBLIC_KEY_HERE";
+  { id: "cookies", category: "Snacks & Sweets", name: "Chocolate Chip Cookies", phantomName: "Witch's Cookies", price: 1.320, emoji: "🍪", phantomEmoji: "🧙🍪" },
+  { id: "cakemix", category: "Snacks & Sweets", name: "Cake Mix", phantomName: "Cursed Cake Mix", price: 1.500, emoji: "🧁", phantomEmoji: "🕯️🧁" },
+  { id: "brownmix", category: "Snacks & Sweets", name: "Brownie Mix", phantomName: "Midnight Brownie Mix", price: 1.500, emoji: "🍫", phantomEmoji: "🌑🍫" },
+  { id: "gummycandy", category: "Snacks & Sweets", name: "Gummy Candy Bag", phantomName: "Monster Gummy Bag", price: 0.940, emoji: "🍬", phantomEmoji: "👹🍬" },
+  { id: "chocolate", category: "Snacks & Sweets", name: "Chocolate Bar", phantomName: "Dark Ritual Chocolate", price: 0.750, emoji: "🍫", phantomEmoji: "🔮🍫" },
+  { id: "cereal", category: "Snacks & Sweets", name: "Cereal Box", phantomName: "Midnight Monster Cereal", price: 1.885, emoji: "🥣", phantomEmoji: "👻🥣" },
 
-let supabaseClient = null;
-
-if (
-  window.supabase &&
-  SUPABASE_URL.startsWith("https://") &&
-  !SUPABASE_URL.includes("PASTE_") &&
-  !SUPABASE_ANON_KEY.includes("PASTE_")
-) {
-  supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-  );
-}
-
-/* SET MENU */
-const categories = [
   {
-    name: "Hot Food",
-    items: [
-      { name: "Burger", price: 9.990, emoji: "🍔" },
-      { name: "Pizza", price: 12.990, emoji: "🍕" },
-      { name: "Fries", price: 4.990, emoji: "🍟" },
-      { name: "Hot Dog", price: 6.990, emoji: "🌭" },
-      { name: "Chicken Tenders", price: 8.990, emoji: "🍗" }
-    ]
+    id: "signaturepack",
+    category: "Drinks",
+    name: "Liberty Foods Signature Pack",
+    phantomName: "Phantom Signature Pack",
+    price: 2.000,
+    emoji: "🧃",
+    phantomEmoji: "🧪",
+    description: "All 7 juice boxes: Liberty Lemon, Freedom Fizz, Patriot Punch, Star-Spangled Strawberry, Eagle Elixir, Justice Jackfruit, and Founding Fruit. Pack only!",
+    phantomDescription: "The seven original flavours return from the shadows. Full pack only — no individual drinks."
   },
   {
-    name: "Snacks & Sweets",
-    items: [
-      { name: "Cookies", price: 2.500, emoji: "🍪" },
-      { name: "Chocolate Bar", price: 1.500, emoji: "🍫" },
-      { name: "Cereal", price: 3.500, emoji: "🥣" },
-      { name: "Candy", price: 1.000, emoji: "🍬" }
-    ]
+    id: "prespack",
+    category: "Drinks",
+    name: "The Pres Pack",
+    phantomName: "The Cursed Pres Pack",
+    price: 2.000,
+    emoji: "🇺🇸",
+    phantomEmoji: "☠️",
+    description: "All 7 juice boxes: Blueberry Biden, Tangerine Trump, Olive Obama, George Watermelon, Lincoln Lime, Raspberry Roosevelt, and Kiwi Kennedy. Pack only!",
+    phantomDescription: "Seven mysterious juice boxes from the haunted archives. Full pack only — no individual drinks."
   },
+
   {
-    name: "Drinks",
-    items: [
-      { name: "Fountain Drink", price: 2.490, emoji: "🥤" },
-      { name: "Water", price: 0.500, emoji: "💧" },
-      { name: "Juice", price: 1.500, emoji: "🧃" }
-    ]
+    id: "mysterypoop",
+    category: "Toys",
+    name: "Mystery Poop Squishies",
+    phantomName: "Phantom Poop Squishies",
+    price: 1.500,
+    emoji: "💩",
+    phantomEmoji: "👻",
+    description: "10 rarities: Common, Uncommon, Rare, Epic, Legendary, Mythical, Secret, Cosmic, Unknown, and Glitch.",
+    phantomDescription: "Ten cursed rarities: Haunted, Spooky, Cursed, Phantom, Demonic, Bloodmoon, Unknown, Void, Forbidden, and 666 Glitch."
   },
-  {
-    name: "Toys",
-    items: [
-      { name: "Poop Squishy", price: 2.000, emoji: "💩" },
-      { name: "Toy Car", price: 3.000, emoji: "🚗" },
-      { name: "Plush Toy", price: 5.000, emoji: "🧸" }
-    ]
-  },
-  {
-    name: "Everyday Essentials",
-    items: [
-      { name: "Toothpaste", price: 1.500, emoji: "🪥" },
-      { name: "Soap", price: 1.000, emoji: "🧼" }
-    ]
-  }
+
+  { id: "toothpaste", category: "Everyday Essentials", name: "Toothpaste Tube", phantomName: "Monster Breath Toothpaste", price: 1.130, emoji: "🪥", phantomEmoji: "🧟" },
+  { id: "toothbrush", category: "Everyday Essentials", name: "Toothbrush", phantomName: "Crypt Cleaner Toothbrush", price: 0.750, emoji: "🪥", phantomEmoji: "🦷" },
+  { id: "travelset", category: "Everyday Essentials", name: "Travel Toothpaste & Brush Set", phantomName: "Haunted Travel Hygiene Set", price: 1.885, emoji: "🧳", phantomEmoji: "🕸️" }
 ];
 
-let activeCategory = categories[0].name;
-let cart = [];
-let discountRate = 0;
+const cart = {};
+let discountApplied = false;
+let sendingOrder = false;
+let phantomMode = false;
 
-const money = amount => "BD " + Number(amount).toFixed(3);
+const $ = id => document.getElementById(id);
+const money = amount => "BD " + amount.toFixed(3);
+const isOctober = () => new Date().getMonth() === 9;
 
-function renderCategories() {
-  const container = document.getElementById("categoryButtons");
-  container.replaceChildren();
-
-  categories.forEach(category => {
-    const button = document.createElement("button");
-    button.textContent = category.name;
-
-    if (category.name === activeCategory) {
-      button.classList.add("active");
-    }
-
-    button.addEventListener("click", () => {
-      activeCategory = category.name;
-      renderCategories();
-      renderMenu();
-    });
-
-    container.appendChild(button);
-  });
+function displayName(item) {
+  return phantomMode ? (item.phantomName || item.name) : item.name;
 }
+
+function displayEmoji(item) {
+  return phantomMode ? (item.phantomEmoji || item.emoji) : item.emoji;
+}
+
+function displayDescription(item) {
+  return phantomMode
+    ? (item.phantomDescription || item.description || "")
+    : (item.description || "");
+}
+
+function showMessage(text, type) {
+  const box = $("message");
+  box.textContent = text;
+  box.className = type;
+}
+
+function hideMessage() {
+  $("message").textContent = "";
+  $("message").className = "hidden";
+}
+
+function applyTheme() {
+  document.body.classList.toggle("phantom", phantomMode);
+  document.title = phantomMode ? "👻 Phantom Foods" : "Liberty Foods";
+
+  $("brandTitle").textContent = phantomMode
+    ? "👻 PHANTOM FOODS ☠️"
+    : "🍔 LIBERTY FOODS 🇺🇸";
+
+  $("brandSubtitle").textContent = phantomMode
+    ? "Cursed food. Unholy flavor."
+    : "Fresh food. Big flavor.";
+
+  $("menuHeading").textContent = phantomMode
+    ? "💀 The Cursed Menu"
+    : "🍽️ Our Menu";
+
+  $("cartHeading").textContent = phantomMode
+    ? "👻 Your Haunted Cart"
+    : "🛒 Your Cart";
+
+  $("footerBrand").textContent = phantomMode
+    ? "👻 Phantom Foods"
+    : "🍔 Liberty Foods";
+
+  $("footerSubtitle").textContent = phantomMode
+    ? "Enter if you dare..."
+    : "Fresh food. Big flavor.";
+
+  document.querySelector('meta[name="theme-color"]')
+    .setAttribute("content", phantomMode ? "#160b24" : "#174c35");
+
+  renderMenu();
+  renderCart();
+}
+
+function activatePhantom() {
+  phantomMode = true;
+  try {
+    localStorage.setItem(PHANTOM_STORAGE_KEY, "true");
+  } catch (error) {
+    console.warn("Could not save Phantom mode preference.", error);
+  }
+  applyTheme();
+}
+
+function deactivatePhantom() {
+  phantomMode = false;
+  try {
+    localStorage.removeItem(PHANTOM_STORAGE_KEY);
+  } catch (error) {
+    console.warn("Could not clear Phantom mode preference.", error);
+  }
+  applyTheme();
+}
+
+// Keep Phantom mode active across refreshes in October only.
+try {
+  phantomMode = isOctober() &&
+    localStorage.getItem(PHANTOM_STORAGE_KEY) === "true";
+} catch (error) {
+  phantomMode = false;
+}
+
+// FIVE CATEGORY BUTTONS
+const categories = [
+  "Hot Food",
+  "Snacks & Sweets",
+  "Drinks",
+  "Toys",
+  "Everyday Essentials"
+];
+
+let selectedCategory = "";
 
 function renderMenu() {
-  const container = document.getElementById("menuItems");
-  container.replaceChildren();
+  $("categoryButtons").innerHTML = categories.map(category => `
+    <button
+      type="button"
+      class="${selectedCategory === category ? "active" : ""}"
+      data-category="${category}"
+      aria-pressed="${selectedCategory === category}">
+      ${category}
+    </button>
+  `).join("");
 
-  const category = categories.find(item => item.name === activeCategory);
-  if (!category) return;
-
-  category.items.forEach(item => {
-    const card = document.createElement("article");
-    card.className = "food";
-
-    const emoji = document.createElement("div");
-    emoji.className = "emoji";
-    emoji.textContent = item.emoji;
-
-    const title = document.createElement("h3");
-    title.textContent = item.name;
-
-    const price = document.createElement("p");
-    price.className = "price";
-    price.textContent = money(item.price);
-
-    const button = document.createElement("button");
-    button.textContent = "Add to Cart";
-    button.addEventListener("click", () => addToCart(item));
-
-    card.append(emoji, title, price, button);
-    container.appendChild(card);
-  });
-}
-
-function addToCart(item) {
-  const existing = cart.find(entry => entry.name === item.name);
-
-  if (existing) {
-    existing.quantity++;
-  } else {
-    cart.push({ ...item, quantity: 1 });
+  if (!selectedCategory) {
+    $("menuItems").innerHTML = phantomMode
+      ? '<p class="hint">Choose a cursed category... if you dare.</p>'
+      : '<p class="hint">Choose a category above to see what’s available!</p>';
+    return;
   }
 
-  renderCart();
+  const items = menu.filter(item => item.category === selectedCategory);
+
+  $("menuItems").innerHTML = items.map(item => `
+    <article class="food">
+      <div class="emoji">${displayEmoji(item)}</div>
+      <h3>${displayName(item)}</h3>
+      ${displayDescription(item)
+        ? `<p class="hint">${displayDescription(item)}</p>` : ""}
+      <p class="price">${money(item.price)}</p>
+      <button type="button" data-add="${item.id}">Add to Cart</button>
+    </article>
+  `).join("");
 }
 
-function changeQuantity(name, amount) {
-  const item = cart.find(entry => entry.name === name);
-  if (!item) return;
+function getTotals() {
+  const subtotal = menu.reduce((sum, item) =>
+    sum + item.price * (cart[item.id] || 0), 0);
 
-  item.quantity += amount;
-
-  if (item.quantity <= 0) {
-    cart = cart.filter(entry => entry.name !== name);
-  }
-
-  renderCart();
-}
-
-function clearCart() {
-  cart = [];
-  renderCart();
-}
-
-function renderCart() {
-  const container = document.getElementById("cartItems");
-  container.replaceChildren();
-
-  if (cart.length === 0) {
-    container.textContent = "Your cart is empty.";
-  } else {
-    cart.forEach(item => {
-      const row = document.createElement("div");
-      row.className = "cart-row";
-
-      const details = document.createElement("span");
-      details.textContent =
-        `${item.emoji} ${item.name} × ${item.quantity} — ` +
-        money(item.price * item.quantity);
-
-      const actions = document.createElement("div");
-      actions.className = "cart-actions";
-
-      const minus = document.createElement("button");
-      minus.textContent = "−";
-      minus.setAttribute("aria-label", "Remove one " + item.name);
-      minus.addEventListener("click", () => changeQuantity(item.name, -1));
-
-      const plus = document.createElement("button");
-      plus.textContent = "+";
-      plus.setAttribute("aria-label", "Add one " + item.name);
-      plus.addEventListener("click", () => changeQuantity(item.name, 1));
-
-      actions.append(minus, plus);
-      row.append(details, actions);
-      container.appendChild(row);
-    });
-  }
-
-  const subtotal = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-
-  const discount = subtotal * discountRate;
+  const discount = discountApplied ? subtotal * 0.10 : 0;
   const taxableAmount = Math.max(0, subtotal - discount);
   const tax = taxableAmount * 0.06;
   const total = taxableAmount + tax;
 
-  document.getElementById("subtotal").textContent = money(subtotal);
-  document.getElementById("discount").textContent = "-" + money(discount);
-  document.getElementById("tax").textContent = money(tax);
-  document.getElementById("total").textContent = money(total);
-  document.getElementById("checkoutTotal").textContent = "Total: " + money(total);
+  return { subtotal, discount, tax, total };
 }
 
-document.getElementById("clearCart").addEventListener("click", clearCart);
+function renderCart() {
+  const rows = menu.filter(item => (cart[item.id] || 0) > 0);
 
-document.getElementById("applyDiscount").addEventListener("click", () => {
-  const code = document.getElementById("discountCode").value.trim();
-  const message = document.getElementById("discountMessage");
-
-  if (code === "faisalrules67") {
-    discountRate = 0.10;
-    message.textContent = "10% discount applied!";
-  } else if (code === "NEVERTYPETHISCODEV666") {
-    document.body.classList.add("phantom");
-    document.getElementById("brandTitle").textContent = "☠ PHANTOM FOODS ☠";
-    document.getElementById("brandSubtitle").textContent =
-      "The curse has arrived...";
-    discountRate = 0;
-    message.textContent = "The October curse has awakened!";
+  if (rows.length === 0) {
+    $("cartItems").textContent = phantomMode
+      ? "Your haunted cart is empty... for now."
+      : "Your cart is empty. Add something delicious!";
   } else {
-    discountRate = 0;
-    message.textContent = "That code isn't valid.";
+    $("cartItems").innerHTML = rows.map(item => `
+      <div class="cart-row">
+        <div>
+          <strong>${displayEmoji(item)} ${displayName(item)}</strong><br>
+          ${money(item.price)} each
+        </div>
+        <div class="cart-actions">
+          <button type="button" data-change="${item.id}" data-amount="-1"
+            aria-label="Remove one ${displayName(item)}">−</button>
+          <strong>${cart[item.id]}</strong>
+          <button type="button" data-change="${item.id}" data-amount="1"
+            aria-label="Add one ${displayName(item)}">+</button>
+          <button type="button" data-remove="${item.id}"
+            style="background:#a52a2a">Remove</button>
+        </div>
+      </div>
+    `).join("");
   }
+
+  const totals = getTotals();
+  $("subtotal").textContent = money(totals.subtotal);
+  $("discount").textContent = "-" + money(totals.discount);
+  $("tax").textContent = money(totals.tax);
+  $("total").textContent = money(totals.total);
+  $("checkoutTotal").textContent = "Total: " + money(totals.total);
+  $("placeOrder").disabled = sendingOrder;
+}
+
+function addToCart(id) {
+  if (!menu.some(item => item.id === id)) return;
+  cart[id] = (cart[id] || 0) + 1;
+  renderCart();
+}
+
+function changeQuantity(id, amount) {
+  if (!menu.some(item => item.id === id)) return;
+  cart[id] = Math.max(0, (cart[id] || 0) + amount);
+  renderCart();
+}
+
+function clearCart() {
+  menu.forEach(item => delete cart[item.id]);
+  discountApplied = false;
+  $("discountCode").value = "";
+  $("discountMessage").textContent = "";
+  renderCart();
+}
+
+$("categoryButtons").addEventListener("click", event => {
+  const button = event.target.closest("[data-category]");
+  if (!button) return;
+
+  selectedCategory = button.dataset.category;
+  renderMenu();
+});
+
+$("menuItems").addEventListener("click", event => {
+  const button = event.target.closest("[data-add]");
+  if (button) addToCart(button.dataset.add);
+});
+
+$("cartItems").addEventListener("click", event => {
+  const button = event.target.closest("button");
+  if (!button) return;
+
+  if (button.dataset.change) {
+    changeQuantity(
+      button.dataset.change,
+      Number(button.dataset.amount)
+    );
+  }
+
+  if (button.dataset.remove) {
+    delete cart[button.dataset.remove];
+    renderCart();
+  }
+});
+
+$("clearCart").addEventListener("click", clearCart);
+
+$("applyDiscount").addEventListener("click", () => {
+  const code = $("discountCode").value.trim();
+
+  // The secret code is a theme code, not a discount.
+  if (code === SECRET_CODE) {
+    if (!isOctober()) {
+      $("discountMessage").textContent =
+        "The curse sleeps. Phantom Foods can only awaken in October. 🎃";
+      return;
+    }
+
+    if (phantomMode) {
+      deactivatePhantom();
+      $("discountMessage").textContent =
+        "The curse has been lifted. Welcome back to Liberty Foods!";
+    } else {
+      activatePhantom();
+      $("discountMessage").textContent =
+        "☠ THE CURSE HAS AWAKENED! Welcome to Phantom Foods! 👻";
+    }
+    return;
+  }
+
+  // Normal discount code keeps working in both themes.
+  discountApplied = code.toLowerCase() === DISCOUNT_CODE;
+  $("discountMessage").textContent = discountApplied
+    ? "Discount applied! You saved 10%."
+    : "That code isn't valid. Check it and try again.";
 
   renderCart();
 });
 
-document.getElementById("fulfillment").addEventListener("change", event => {
-  const delivery = event.target.value === "Delivery";
-  document.getElementById("addressSection").classList.toggle("hidden", !delivery);
-  document.getElementById("address").required = delivery;
+$("fulfillment").addEventListener("change", () => {
+  const delivery = $("fulfillment").value === "Delivery";
+  $("addressSection").classList.toggle("hidden", !delivery);
+  $("address").required = delivery;
 });
 
-/* CHECKOUT */
-document.getElementById("checkoutForm").addEventListener("submit", async event => {
-  event.preventDefault();
-
-  const message = document.getElementById("message");
-  const placeOrder = document.getElementById("placeOrder");
-
-  if (cart.length === 0) {
-    message.className = "error";
-    message.textContent = "Your cart is empty. Add something first!";
-    return;
-  }
-
-  if (!window.emailjs) {
-    message.className = "error";
-    message.textContent = "Email service isn't available right now.";
-    return;
-  }
-
-  const subtotal = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-  const discount = subtotal * discountRate;
-  const tax = Math.max(0, subtotal - discount) * 0.06;
-  const total = subtotal - discount + tax;
-
-  const orderDetails = cart.map(item =>
-    `${item.name} x ${item.quantity} = ${money(item.price * item.quantity)}`
-  ).join("\n");
-
-  const templateParams = {
-    customer_name: document.getElementById("customerName").value.trim(),
-    customer_email: document.getElementById("customerEmail").value.trim(),
-    customer_phone: document.getElementById("customerPhone").value.trim(),
-    fulfillment: document.getElementById("fulfillment").value,
-    address: document.getElementById("address").value.trim(),
-    order_notes: document.getElementById("orderNotes").value.trim(),
-    order_details: orderDetails,
-    subtotal: money(subtotal),
-    discount: money(discount),
-    tax: money(tax),
-    total: money(total)
-  };
-
-  placeOrder.disabled = true;
-  placeOrder.textContent = "Sending order...";
-
-  try {
-    await emailjs.send(
-      EMAILJS_SERVICE_ID,
-      EMAILJS_TEMPLATE_ID,
-      templateParams
-    );
-
-    message.className = "success";
-    message.textContent =
-      "Order email sent! This demo does not process payments. " +
-      "Your cart has been saved on this page until you clear it.";
-  } catch (error) {
-    console.error("Order email failed:", error);
-    message.className = "error";
-    message.textContent =
-      "We couldn't send the order email. Your cart is still saved. Please try again.";
-  } finally {
-    placeOrder.disabled = false;
-    placeOrder.textContent = "Place Order";
-  }
-});
-  /* MARKETPLACE: LOAD PUBLIC LISTINGS */
-async function loadMarketplace() {
-  const status = document.getElementById("marketplaceStatus");
-  const container = document.getElementById("marketplaceListings");
-
-  container.replaceChildren();
-
-  if (!supabaseClient) {
-    status.textContent =
-      "Marketplace database not connected yet. Set up Supabase to share listings with everyone.";
-    return;
-  }
-
-  status.textContent = "Loading marketplace listings...";
-
-  try {
-    const { data, error } = await supabaseClient
-      .from("marketplace_listings")
-      .select("id, name, price, description, image_url, created_at")
-      .order("created_at", { ascending: false });
-
-    if (error) throw error;
-
-    if (!data || data.length === 0) {
-      status.textContent = "No listings yet. Be the first to list something!";
-      return;
-    }
-
-    status.textContent = `${data.length} marketplace listing(s)`;
-
-    data.forEach(item => {
-      const card = document.createElement("article");
-      card.className = "listing-card";
-
-      const img = document.createElement("img");
-      img.src = item.image_url;
-      img.alt = item.name;
-      img.loading = "lazy";
-      img.onerror = () => {
-        img.alt = "Image unavailable";
-        img.removeAttribute("src");
-      };
-
-      const title = document.createElement("h3");
-      title.textContent = item.name;
-
-      const price = document.createElement("p");
-      price.className = "listing-price";
-      price.textContent = money(Number(item.price));
-
-      const description = document.createElement("p");
-      description.textContent = item.description;
-
-      card.append(img, title, price, description);
-      container.appendChild(card);
-    });
-  } catch (error) {
-    console.error("Marketplace loading error:", error);
-    status.textContent =
-      "Couldn't load listings. Check your Supabase database setup.";
-  }
+function makeOrderNumber() {
+  return (phantomMode ? "PF-" : "LF-") +
+    Date.now().toString().slice(-9);
 }
 
-/* PUBLISH A LISTING */
-document.getElementById("sellForm").addEventListener("submit", async event => {
+$("checkoutForm").addEventListener("submit", async event => {
   event.preventDefault();
+  hideMessage();
 
-  const form = event.currentTarget;
-  const message = document.getElementById("sellMessage");
-  const button = document.getElementById("publishListing");
-  const photo = document.getElementById("listingImage").files[0];
-  const name = document.getElementById("listingName").value.trim();
-  const price = Number(document.getElementById("listingPrice").value);
-  const description =
-    document.getElementById("listingDescription").value.trim();
+  if (sendingOrder) return;
 
-  function showSellMessage(type, text) {
-    message.className = type;
-    message.textContent = text;
-  }
+  const totals = getTotals();
 
-  if (!supabaseClient) {
-    showSellMessage(
-      "info",
-      "Supabase isn't connected yet. Your listing hasn't been published. The shared database must be configured first."
+  if (totals.subtotal <= 0) {
+    showMessage(
+      "Your cart is empty! Add food before placing an order.",
+      "error"
     );
     return;
   }
 
-  if (!photo || !name || !description || !Number.isFinite(price) ||
-      price <= 0 || price > 100000) {
-    showSellMessage("error", "Please check all the fields and try again.");
+  if (!EMAILJS_PUBLIC_KEY || !EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID) {
+    showMessage("EmailJS settings are missing. Check the code.", "error");
     return;
   }
 
-  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-
-  if (!allowedTypes.includes(photo.type)) {
-    showSellMessage("error", "Please upload a JPG, PNG, or WebP image.");
+  if (typeof emailjs === "undefined") {
+    showMessage(
+      "The EmailJS script did not load. Check your connection and reload.",
+      "error"
+    );
     return;
   }
 
-  if (photo.size > 5 * 1024 * 1024) {
-    showSellMessage("error", "Your photo must be 5 MB or smaller.");
+  const fulfillment = $("fulfillment").value;
+  const address = $("address").value.trim();
+
+  if (fulfillment === "Delivery" && !address) {
+    showMessage("Please enter your delivery address.", "error");
+    $("address").focus();
     return;
   }
 
-  button.disabled = true;
-  button.textContent = "Publishing...";
+  const orderNumber = makeOrderNumber();
+
+  const orderItems = menu
+    .filter(item => (cart[item.id] || 0) > 0)
+    .map(item =>
+      `${displayName(item)} x ${cart[item.id]} = ${money(item.price * cart[item.id])}`
+    )
+    .join("\n");
+
+  const templateParams = {
+    order_number: orderNumber,
+    customer_name: $("customerName").value.trim(),
+    customer_email: $("customerEmail").value.trim(),
+    customer_phone: $("customerPhone").value.trim() || "Not provided",
+    fulfillment: fulfillment,
+    address: fulfillment === "Delivery" ? address : "Pickup",
+    order_items: (phantomMode ? "PHANTOM FOODS ORDER\n" : "LIBERTY FOODS ORDER\n") + orderItems,
+    subtotal: money(totals.subtotal),
+    discount: money(totals.discount),
+    tax: money(totals.tax),
+    total: money(totals.total),
+    order_notes: $("orderNotes").value.trim() || "None"
+  };
+
+  sendingOrder = true;
+  $("placeOrder").textContent = "Sending Order...";
+  renderCart();
+  showMessage("Sending your order email. Please wait...", "info");
 
   try {
-    const safeName = photo.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const imagePath =
-      `${Date.now()}-${Math.random().toString(36).slice(2)}-${safeName}`;
+    const response = await emailjs.send(
+      EMAILJS_SERVICE_ID,
+      EMAILJS_TEMPLATE_ID,
+      templateParams,
+      { publicKey: EMAILJS_PUBLIC_KEY }
+    );
 
-    const { error: uploadError } = await supabaseClient.storage
-      .from("marketplace-images")
-      .upload(imagePath, photo, {
-        contentType: photo.type,
-        upsert: false
-      });
+    console.log("EmailJS success:", response.status, response.text);
 
-    if (uploadError) throw uploadError;
+    showMessage(
+      "Order " + orderNumber +
+      " sent successfully! Your order notification has been sent.",
+      "success"
+    );
 
-    const { data: publicData } = supabaseClient.storage
-      .from("marketplace-images")
-      .getPublicUrl(imagePath);
-
-    const imageUrl = publicData.publicUrl;
-
-    const { error: insertError } = await supabaseClient
-      .from("marketplace_listings")
-      .insert([{
-        name: name,
-        price: price,
-        description: description,
-        image_url: imageUrl
-      }]);
-
-    if (insertError) throw insertError;
-
-    showSellMessage("success", "Listing published! 🎉");
-    form.reset();
-    await loadMarketplace();
-    document.getElementById("marketplace").scrollIntoView({
-      behavior: "smooth"
-    });
+    clearCart();
+    $("orderNotes").value = "";
   } catch (error) {
-    console.error("Listing publish error:", error);
-    showSellMessage(
-      "error",
-      "Couldn't publish your listing. Check the Supabase table, storage bucket, and security policies."
+    console.error("EmailJS send failed:", error);
+
+    const details = error && error.text
+      ? error.text
+      : error && error.message
+        ? error.message
+        : String(error);
+
+    showMessage(
+      "The email could not be sent, so your cart is still saved.\n\n" +
+      "Technical error: " + details,
+      "error"
     );
   } finally {
-    button.disabled = false;
-    button.textContent = "Publish on Liberty Foods";
+    sendingOrder = false;
+    $("placeOrder").textContent = "Place Order";
+    renderCart();
   }
 });
 
-/* START THE WEBSITE */
-renderCategories();
-renderMenu();
-renderCart();
-loadMarketplace();
-
-/* Keep the page's navigation links working smoothly */
-document.querySelectorAll('nav a[href^="#"]').forEach(link => {
-  link.addEventListener("click", event => {
-    const target = document.querySelector(link.getAttribute("href"));
-
-    if (target) {
-      event.preventDefault();
-      target.scrollIntoView({ behavior: "smooth" });
-    }
-  });
-});
+applyTheme();
 </script>
+
+<section id="about-us" class="panel" style="
+  padding: 35px;
+  margin-top: 35px;
+  line-height: 1.8;
+  font-size: 17px;
+">
+
+  <div style="text-align:center; padding: 20px 0 30px;">
+    <p style="font-size:50px; margin:0;">🍔🇺🇸</p>
+    <h2 style="font-size:36px; margin:10px 0;">
+      Meet the Creator
+    </h2>
+    <p style="font-size:20px; margin:0;">
+      The person behind Liberty Foods
+    </p>
+    <p style="font-size:18px; font-weight:bold;">
+      Fresh food. Big flavor.
+    </p>
+  </div>
+
+  <hr>
+
+  <h2>👋 Hey, welcome to my world!</h2>
+
+  <p>
+    Hey! I'm Faisal, the creator of Liberty Foods, and this is a project
+    that I've been building with my own ideas, creativity, and
+    imagination. I wanted to make something of my own — something
+    that I could keep improving, experimenting with, and turning
+    into something bigger.
+  </p>
+
+  <p>
+    Liberty Foods isn't just about putting products on a page.
+    It's about taking an idea and actually building it into
+    something people can visit and explore. From the menu and
+    shopping cart to the checkout system and all the little
+    features, I've been working on making this website my own.
+  </p>
+
+  <hr>
+
+  <h2>💡 How Liberty Foods Came to Life</h2>
+
+  <p>
+    Every project starts with an idea. Liberty Foods is my way
+    of bringing one of those ideas to life through technology,
+    design, and a lot of experimenting.
+  </p>
+
+  <p>
+    I've worked on making the website interactive, adding
+    different product categories, building an ordering system,
+    and creating features that make it more interesting to use.
+    There's always something new to improve or another idea
+    to try.
+  </p>
+
+  <h2>🛠️ Built With Creativity</h2>
+
+  <p>
+    One of my favourite parts of creating Liberty Foods is being
+    able to think of something and then work out how to make it
+    happen. Building a website means solving problems, testing
+    things, fixing mistakes, and learning along the way.
+  </p>
+
+  <p>
+    I want Liberty Foods to keep growing as I come up with more
+    ideas. There is always room for new products, new features,
+    and unexpected surprises!
+  </p>
+
+  <hr>
+
+  <div style="
+    text-align:center;
+    background:#fff4d8;
+    color:#183d32;
+    border-radius:14px;
+    padding:25px;
+    margin-top:25px;
+  ">
+    <h2 style="font-size:27px; margin-top:0;">
+      🇺🇸 My Vision for Liberty Foods
+    </h2>
+    <p>
+      Liberty Foods is my project, my creativity, and my vision.
+      I'm excited to keep building it, improving it, and seeing
+      how far I can take it.
+    </p>
+    <p style="font-size:21px; font-weight:bold;">
+      Thanks for being part of the journey! 🍔
+      
+    </p>
+  </div>
+</section>
 </body>
 </html>
